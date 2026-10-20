@@ -1,0 +1,10 @@
+{
+  "git.path": "C:\\Users\\ii768\\AppData\\Local\\Programs\\MinGit\\cmd\\git.exe",
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.postCommitCommand": "push",
+  "git.confirmSync": false,
+  "git.autoStash": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000
+}

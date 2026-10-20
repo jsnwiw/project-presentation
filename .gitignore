@@ -1,0 +1,9 @@
+# Logs and temp files
+scratch_districts.json
+all_regions_full.json
+scratch_active_code.txt
+scratch_auth_info.json
+*.pyc
+__pycache__/
+.DS_Store
+Thumbs.db

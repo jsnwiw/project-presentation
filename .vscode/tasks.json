@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 원터치 클라우드 자동 배포 (GitHub Pages)",
+      "type": "shell",
+      "command": "powershell -Command \"$env:PATH = 'C:\\Users\\ii768\\AppData\\Local\\Programs\\MinGit\\cmd;C:\\Users\\ii768\\AppData\\Local\\Programs\\gh\\bin;' + $env:PATH; git add .; $msg = 'Update: ' + (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'); git commit -m $msg; git push origin main; Write-Host '✅ GitHub 클라우드 배포 성공! (https://jsnwiw.github.io/ppt1/)' -ForegroundColor Green\"",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    }
+  ]
+}

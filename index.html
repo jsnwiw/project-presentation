@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>대한민국 인프라 소외지역 분석 지도</title>
+  
+  <!-- Leaflet CSS & JS 라이브러리 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster (핀 겹침 방지) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Glassmorphism 스타일시트 -->
+  <link rel="stylesheet" href="css/style.css?v=20261020_quake" />
+</head>
+<body>
+
+  <!-- 🌋 실시간 지진 알림 배너 -->
+  <div id="quakeAlertBanner" class="quake-alert-banner" role="alert" aria-live="assertive"></div>
+
+  <div class="glass-phone-shell">
+    <!-- 상단 헤더 -->
+    <header class="glass-header">
+      <div class="brand-logo">
+        <div class="sf-icon">🛰️</div>
+        <div class="brand-text">
+          <h1>대한민국 인프라 소외지역 분석</h1>
+          <p>초고화질 위성 한국어 지명 및 전국 18대 인프라 정밀 분석</p>
+        </div>
+      </div>
+
+      <!-- 검색 도크 -->
+      <div class="search-dock">
+        <div class="search-glass-pill">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="searchInput" class="glass-input" placeholder="전국 모든 행정구역 검색 (예: 서울, 이천, 수원, 부산, 제주)..." autocomplete="off" oninput="handleSearchInput(event)" />
+          <div id="autocompleteList" class="autocomplete-list"></div>
+        </div>
+        <button class="glass-btn btn-apple-blue" onclick="executeSearchButton()">검색</button>
+        <button class="glass-btn btn-apple-danger" onclick="openDisasterModal()"><span class="disaster-pulse-dot"></span>🚨 재해</button>
+        <button class="glass-btn btn-apple-blue" onclick="openTutorial()">ℹ️ 사용방법</button>
+        <button class="glass-btn btn-apple-blue" onclick="startInfrastructureAutoDemo()" title="원터치 자동 시연 (음성 해설 포함)">🎬 자동 시연</button>
+      </div>
+    </header>
+
+    <!-- 실시간 상태 바 -->
+    <div class="sync-status-bar">
+      <span><span class="live-badge">LIVE</span> 인프라 트래픽 반영 중 (<span id="realtimeStreamStatus" style="color: #007aff; font-weight: 700;">전국 18대 인프라 스트림 통합</span>)</span>
+      <span id="quakeMonitorBadge" class="quake-monitor-badge loading">🌋 지진 연결 중…</span>
+      <span style="font-size: 11px; color: #515156;">다음 동기화: <b id="syncTimerText" style="color: var(--apple-blue);">10:00</b></span>
+    </div>
+
+    <!-- 모바일/태블릿 반응형 뷰 스위처 탭 바 (화면이 작을 때 자동 표시) -->
+    <div class="mobile-view-tabs" id="mobileViewTabs">
+      <button class="mobile-tab-btn active" id="tabMapBtn" onclick="switchMobileView('map')">🗺️ 지도 화면</button>
+      <button class="mobile-tab-btn" id="tabPanelBtn" onclick="switchMobileView('panel')">📋 13대 진단 패널</button>
+    </div>
+
+    <!-- 메인 콘텐츠 레이아웃 (패널 좌측, 지도 우측) -->
+    <div class="content-layout">
+      <!-- 사이드바 래퍼 (사이드바와 우측 플로팅 접기 핸들 일체형 컨테이너) -->
+      <div class="sidebar-wrapper" id="sidebarWrapper">
+        <!-- 소외지역 항목 패널 (좌측) -->
+        <aside class="category-item-sidebar" id="categoryItemSidebar">
+          <div class="sidebar-title">📋 소외지역 항목 패널</div>
+          <div style="font-size: 12px; color: #86868b; padding: 10px; text-align: center;">
+            전체 보기 또는 카테고리를 선택하면<br>해당 소외지역 항목들이 표시됩니다.
+          </div>
+        </aside>
+
+        <!-- 패널 접기/펼치기 플로팅 핸들 버튼 (사이드바 우측 바깥 경계에 100% 정확히 밀착) -->
+        <button class="panel-toggle-btn" id="panelToggleBtn" onclick="toggleSidebarPanel()" title="패널 접기 / 펼치기">
+          <span id="panelToggleIcon">◀</span>
+        </button>
+      </div>
+
+      <!-- 지도 영역 (우측 메인) -->
+      <div class="map-wrapper">
+        <!-- 지도 상단 인프라 분석 레이어 빠른 ON/OFF 토글 바 -->
+        <div class="map-quick-toggles">
+          <button class="layer-toggle-btn active" data-layer="emergency" onclick="toggleOverlayLayer('emergency')"><span class="toggle-dot"></span>🚨 응급사각 (30km)</button>
+          <button class="layer-toggle-btn active" data-layer="extinction" onclick="toggleOverlayLayer('extinction')"><span class="toggle-dot"></span>📉 소멸위험</button>
+          <button class="layer-toggle-btn" data-layer="maternal" onclick="toggleOverlayLayer('maternal')"><span class="toggle-dot"></span>👶 분만공백</button>
+          <button class="layer-toggle-btn" data-layer="transit" onclick="toggleOverlayLayer('transit')"><span class="toggle-dot"></span>🚆 교통단절</button>
+          <button class="layer-toggle-btn" data-layer="energy" onclick="toggleOverlayLayer('energy')"><span class="toggle-dot"></span>⚡ 에너지소외</button>
+          <button class="layer-toggle-btn" data-layer="banking" onclick="toggleOverlayLayer('banking')"><span class="toggle-dot"></span>🏦 금융소외</button>
+          <button class="layer-toggle-btn" data-layer="disasterEarthquake" onclick="toggleEarthquakeDisaster()"><span class="toggle-dot"></span>🌋 지진 경보</button>
+        </div>
+        <!-- 실시간 지도 반영 알림 토스트 배너 -->
+        <div id="liveMapToast" class="live-map-toast"></div>
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚨 재해 알림 모달 -->
+  <div id="disasterModalOverlay" class="modal-overlay" onclick="closeModalOnBackdrop(event, 'disasterModalOverlay')">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span style="font-weight: 800; color: #ff3b30;">🚨 실시간 재난 알림 (지진 감지)</span>
+        <button class="modal-close" onclick="closeDisasterModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 🌋 실시간 지진 감지 패널 (USGS 실시간 데이터) -->
+        <div class="quake-panel" id="quakePanel">
+          <div class="quake-panel-head">
+            <span class="quake-panel-title">🌋 실시간 지진 감지</span>
+            <span class="quake-status loading" id="quakeStatus">연결 중…</span>
+          </div>
+          <div class="quake-controls">
+            <button class="quake-ctl-btn" onclick="refreshEarthquakes(true)">🔄 새로고침</button>
+            <button class="quake-ctl-btn" id="quakeNotifyBtn" onclick="requestQuakeNotification()">🔔 브라우저 알림 켜기</button>
+            <button class="quake-ctl-btn" id="quakeSoundBtn" onclick="toggleQuakeSound()">🔊 소리 켜짐</button>
+            <button class="quake-ctl-btn" onclick="testQuakeAlert()">🧪 모의 알림 테스트</button>
+            <button class="quake-ctl-btn primary" onclick="triggerEarthquakeDisaster()">🗺️ 지도에서 보기</button>
+          </div>
+          <div class="quake-list" id="quakeList">
+            <div class="quake-empty">지진 정보를 불러오는 중입니다…</div>
+          </div>
+          <div class="quake-note">
+            ※ 기상청 지진정보 조회서비스(공공데이터포털)를 우선 사용하며, 연결 실패 시 USGS 데이터를 보조로 활용합니다. 5분마다 자동 확인하며 <b>조기경보가 아니므로</b>, 공식 지진속보·재난문자는 기상청과 국민재난안전포털을 따르세요.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚠️ 검색 오류 / 결과 없음 커스텀 알림 모달 UI -->
+  <div id="searchAlertModal" class="modal-overlay" onclick="closeSearchAlertOnBackdrop(event)">
+    <div class="alert-modal-window">
+      <div class="alert-icon-badge" id="searchAlertIcon">🔍</div>
+      <h3 class="alert-title" id="searchAlertTitle">검색 결과가 없습니다</h3>
+      <p class="alert-message" id="searchAlertMessage"></p>
+      <div class="alert-suggestions" id="searchAlertSuggestions"></div>
+      <div class="alert-actions">
+        <button class="glass-btn btn-apple-blue" style="width: 100%; justify-content: center;" onclick="closeSearchAlert()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📖 튜토리얼 (사용방법 안내) 모달 -->
+  <div id="tutorialModalOverlay" class="modal-overlay" onclick="closeTutorialOnBackdrop(event)">
+    <div class="tutorial-window" id="tutCard">
+      <!-- 헤더 -->
+      <div class="tutorial-header">
+        <span class="tutorial-header-title">📖 사용 가이드</span>
+        <span class="tutorial-progress" id="tutProgress">1 / 10</span>
+        <button class="modal-close" onclick="closeTutorial()">&times;</button>
+      </div>
+      <!-- 프로그레스 바 -->
+      <div class="tutorial-progress-track">
+        <div class="tutorial-progress-bar" id="tutProgressBar" style="width: 10%;"></div>
+      </div>
+      <!-- 본문 -->
+      <div class="tutorial-body">
+        <div class="tutorial-icon-badge" id="tutStepIcon">👋</div>
+        <h3 class="tutorial-step-title" id="tutStepTitle"></h3>
+        <p class="tutorial-step-desc" id="tutStepDesc"></p>
+      </div>
+      <!-- 네비게이션 -->
+      <div class="tutorial-nav">
+        <button class="glass-btn tutorial-nav-btn" id="tutPrevBtn" onclick="tutorialPrev()">◀ 이전</button>
+        <button class="glass-btn tutorial-nav-btn" id="tutAutoPlayBtn" onclick="toggleTutorialAutoPlay()" style="background: rgba(0, 122, 255, 0.12); color: #007aff; font-weight: 700;">▶ 자동 넘김</button>
+        <button class="glass-btn btn-apple-blue tutorial-nav-btn" id="tutNextBtn" onclick="tutorialNext()">다음 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기능별 분리된 자바스크립트 파일들 -->
+  <script src="js/data.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/earthquake.js?v=20261020_5min"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/tutorial.js?v=20261020_autoplay"></script>
+  <script src="js/demo.js?v=20261020_tts2"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
