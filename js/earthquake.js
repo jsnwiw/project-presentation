@@ -95,7 +95,7 @@ function renderEarthquakeMarkersOnMap(earthquakeList) {
         // 유효한 좌표값인지 검증
         if (isNaN(lat) || isNaN(lon)) return;
 
-        // 사용 중인 지도 라이브러리(Leaflet 또는 Google Maps 등)에 맞게 마커 추가
+        // Leaflet 또는 Google Maps 등 프로젝트 환경에 맞춘 마커 추가 처리
         /* 
         // [예시] Leaflet 라이브러리 사용 시:
         const marker = L.marker([lat, lon]).addTo(map);
@@ -107,24 +107,6 @@ function renderEarthquakeMarkersOnMap(earthquakeList) {
                 - 시간: ${time}
             </div>
         `);
-        earthquakeMarkers.push(marker);
-        */
-
-        // [예시] Google Maps API 사용 시:
-        /*
-        const marker = new google.maps.Marker({
-            position: { lat: lat, lng: lon },
-            map: map,
-            title: `[지진] ${location} (규모 ${magnitude})`
-        });
-        
-        const infowindow = new google.maps.InfoWindow({
-            content: `<div><strong>🚨 지진 발생</strong><br>위치: ${location}<br>규모: ${magnitude}<br>시간: ${time}</div>`
-        });
-
-        marker.addListener("click", () => {
-            infowindow.open(map, marker);
-        });
         earthquakeMarkers.push(marker);
         */
     });
@@ -151,7 +133,7 @@ function updateConnectionStatusUI(statusType, message) {
     }
 }
 
-// 최초 실행 및 주기적 폴링 설정 (예: 60초마다 데이터 갱신)
+// 최초 실행 및 주기적 폴링 설정 (60초마다 데이터 갱신)
 document.addEventListener("DOMContentLoaded", () => {
     fetchAndRenderRealtimeEarthquakes();
     setInterval(fetchAndRenderRealtimeEarthquakes, 60000);
