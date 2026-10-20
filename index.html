@@ -40,7 +40,6 @@
           <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
         <button class="glass-btn btn-apple-blue" onclick="executeSearchButton()">검색</button>
-        <button class="glass-btn btn-apple-danger" onclick="openDisasterModal()"><span class="disaster-pulse-dot"></span>🚨 재해</button>
         <button class="glass-btn btn-apple-blue" onclick="openTutorial()">ℹ️ 사용방법</button>
         <button class="glass-btn btn-apple-blue" onclick="startInfrastructureAutoDemo()" title="원터치 자동 시연 (음성 해설 포함)">🎬 자동 시연</button>
       </div>
@@ -90,21 +89,6 @@
         <!-- 실시간 지도 반영 알림 토스트 배너 -->
         <div id="liveMapToast" class="live-map-toast"></div>
         <div id="map"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🚨 재해 알림 모달 -->
-  <div id="disasterModalOverlay" class="modal-overlay" onclick="closeModalOnBackdrop(event, 'disasterModalOverlay')">
-    <div class="modal-window">
-      <div class="modal-header">
-        <span style="font-weight: 800; color: #ff3b30;">🚨 실시간 재난 알림</span>
-        <button class="modal-close" onclick="closeDisasterModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div style="padding: 20px; text-align: center; color: #515156;">
-          등록된 재난 알림 정보가 없습니다.
-        </div>
       </div>
     </div>
   </div>
