@@ -19,9 +19,6 @@
 </head>
 <body>
 
-  <!-- 🌋 실시간 지진 알림 배너 -->
-  <div id="quakeAlertBanner" class="quake-alert-banner" role="alert" aria-live="assertive"></div>
-
   <div class="glass-phone-shell">
     <!-- 상단 헤더 -->
     <header class="glass-header">
@@ -52,7 +49,6 @@
     <!-- 실시간 상태 바 -->
     <div class="sync-status-bar">
       <span><span class="live-badge">LIVE</span> 인프라 트래픽 반영 중 (<span id="realtimeStreamStatus" style="color: #007aff; font-weight: 700;">전국 18대 인프라 스트림 통합</span>)</span>
-      <span id="quakeMonitorBadge" class="quake-monitor-badge loading">🌋 지진 연결 중…</span>
       <span style="font-size: 11px; color: #515156;">다음 동기화: <b id="syncTimerText" style="color: var(--apple-blue);">10:00</b></span>
     </div>
 
@@ -90,7 +86,6 @@
           <button class="layer-toggle-btn" data-layer="transit" onclick="toggleOverlayLayer('transit')"><span class="toggle-dot"></span>🚆 교통단절</button>
           <button class="layer-toggle-btn" data-layer="energy" onclick="toggleOverlayLayer('energy')"><span class="toggle-dot"></span>⚡ 에너지소외</button>
           <button class="layer-toggle-btn" data-layer="banking" onclick="toggleOverlayLayer('banking')"><span class="toggle-dot"></span>🏦 금융소외</button>
-          <button class="layer-toggle-btn" data-layer="disasterEarthquake" onclick="toggleEarthquakeDisaster()"><span class="toggle-dot"></span>🌋 지진 경보</button>
         </div>
         <!-- 실시간 지도 반영 알림 토스트 배너 -->
         <div id="liveMapToast" class="live-map-toast"></div>
@@ -103,29 +98,12 @@
   <div id="disasterModalOverlay" class="modal-overlay" onclick="closeModalOnBackdrop(event, 'disasterModalOverlay')">
     <div class="modal-window">
       <div class="modal-header">
-        <span style="font-weight: 800; color: #ff3b30;">🚨 실시간 재난 알림 (지진 감지)</span>
+        <span style="font-weight: 800; color: #ff3b30;">🚨 실시간 재난 알림</span>
         <button class="modal-close" onclick="closeDisasterModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- 🌋 실시간 지진 감지 패널 (USGS 실시간 데이터) -->
-        <div class="quake-panel" id="quakePanel">
-          <div class="quake-panel-head">
-            <span class="quake-panel-title">🌋 실시간 지진 감지</span>
-            <span class="quake-status loading" id="quakeStatus">연결 중…</span>
-          </div>
-          <div class="quake-controls">
-            <button class="quake-ctl-btn" onclick="refreshEarthquakes(true)">🔄 새로고침</button>
-            <button class="quake-ctl-btn" id="quakeNotifyBtn" onclick="requestQuakeNotification()">🔔 브라우저 알림 켜기</button>
-            <button class="quake-ctl-btn" id="quakeSoundBtn" onclick="toggleQuakeSound()">🔊 소리 켜짐</button>
-            <button class="quake-ctl-btn" onclick="testQuakeAlert()">🧪 모의 알림 테스트</button>
-            <button class="quake-ctl-btn primary" onclick="triggerEarthquakeDisaster()">🗺️ 지도에서 보기</button>
-          </div>
-          <div class="quake-list" id="quakeList">
-            <div class="quake-empty">지진 정보를 불러오는 중입니다…</div>
-          </div>
-          <div class="quake-note">
-            ※ 기상청 지진정보 조회서비스(공공데이터포털)를 우선 사용하며, 연결 실패 시 USGS 데이터를 보조로 활용합니다. 5분마다 자동 확인하며 <b>조기경보가 아니므로</b>, 공식 지진속보·재난문자는 기상청과 국민재난안전포털을 따르세요.
-          </div>
+        <div style="padding: 20px; text-align: center; color: #515156;">
+          등록된 재난 알림 정보가 없습니다.
         </div>
       </div>
     </div>
@@ -177,7 +155,6 @@
   <script src="js/map.js"></script>
   <script src="js/search.js"></script>
   <script src="js/modal.js"></script>
-  <script src="js/earthquake.js?v=20261020_5min"></script>
   <script src="js/timer.js"></script>
   <script src="js/tutorial.js?v=20261020_autoplay"></script>
   <script src="js/demo.js?v=20261020_tts2"></script>
